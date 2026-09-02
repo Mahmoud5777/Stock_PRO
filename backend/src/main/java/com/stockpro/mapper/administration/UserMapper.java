@@ -1,0 +1,60 @@
+package com.stockpro.mapper.administration;
+
+import com.stockpro.dto.administration.UserDTO;
+import com.stockpro.entity.administration.User;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class UserMapper {
+
+    public UserDTO toDto(User entity) {
+        if (entity == null) return null;
+        return UserDTO.builder()
+                .idUtil(entity.getIdUtil())
+                .nomComplet(entity.getNomComplet())
+                .login(entity.getLogin())
+                .email(entity.getEmail())
+                .telephone(entity.getTelephone())
+                .etatCompte(entity.getEtatCompte())
+                .doitChangerMdp(entity.getDoitChangerMdp())
+                .dateCreation(entity.getDateCreation())
+                .build();
+    }
+
+
+    public List<UserDTO> toDtoList(List<User> entities) {
+        if (entities == null) {
+            return List.of(); // or Collections.emptyList()
+        }
+
+        return entities.stream()
+                .map(this::toDto)
+                .toList(); // Java 16+
+        // .collect(Collectors.toList()); // if you're on older Java
+    }
+    public Page<UserDTO> toDtoPage(Page<User> page) {
+        if (page == null) {
+            return Page.empty();
+        }
+
+        return page.map(this::toDto);
+    }
+
+    public User toEntity(UserDTO dto) {
+        if (dto == null) return null;
+        return User.builder()
+                .idUtil(dto.getIdUtil())
+                .nomComplet(dto.getNomComplet())
+                .login(dto.getLogin())
+                .motPasse(dto.getMotPasse())
+                .email(dto.getEmail())
+                .telephone(dto.getTelephone())
+                .etatCompte(dto.getEtatCompte())
+                .doitChangerMdp(dto.getDoitChangerMdp())
+                .dateCreation(dto.getDateCreation())
+                .build();
+    }
+}
