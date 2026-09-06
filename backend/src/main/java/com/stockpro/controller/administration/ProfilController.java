@@ -3,6 +3,7 @@ package com.stockpro.controller.administration;
 import com.stockpro.dto.administration.ProfilDTO;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.service.administration.ProfilService;
+import com.stockpro.util.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,8 +30,11 @@ public class ProfilController {
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_PROFILS', 'CONSULTATION')")
     @GetMapping
     public ResponseEntity<PageResponseDTO<ProfilDTO>> getAll(
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "libelle") Pageable pageable) {
-        Page<ProfilDTO> page = profilService.findAll(pageable);
+        Page<ProfilDTO> page = (search == null || search.isBlank())
+                ? profilService.findAll(pageable)
+                : profilService.search(search, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
     }
 
@@ -48,6 +52,20 @@ public class ProfilController {
     @GetMapping("/all")
     public ResponseEntity<List<ProfilDTO>> getAllUnpaged() {
         return ResponseEntity.ok(profilService.findAll());
+    }
+
+    @Operation(summary = "Export profiles (search) to Excel (.xlsx)")
+    @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_PROFILS', 'EXPORT')")
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String search) {
+        List<ProfilDTO> profils = (search == null || search.isBlank())
+                ? profilService.findAll(Pageable.unpaged()).getContent()
+                : profilService.search(search, Pageable.unpaged()).getContent();
+        List<Object[]> rows = profils.stream()
+                .map(p -> new Object[]{p.getCodeProfil(), p.getLibelle(), p.getDescription()})
+                .toList();
+        return ExcelExporter.asResponse("profiles.xlsx", "Profiles",
+                new String[]{"Code", "Name", "Description"}, rows);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_PROFILS', 'CONSULTATION')")

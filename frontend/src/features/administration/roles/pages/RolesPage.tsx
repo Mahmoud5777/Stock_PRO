@@ -7,6 +7,7 @@ import { RoleFormModal } from "../components/RoleFormModal";
 import type { Role } from "../types/role.types";
 import type { RoleFormValues } from "../validation/role.validation";
 import { CrudPageHeader } from "@/features/administration/shared/components/CrudPageHeader";
+import { SearchFilterBar } from "@/features/administration/shared/components/SearchFilterBar";
 import { PageCard } from "@/features/administration/shared/components/PageCard";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { Pagination } from "@/components/ui/Pagination";
@@ -14,6 +15,8 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { RequirePermission } from "@/features/auth/components/RequirePermission";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { downloadSpreadsheet } from "@/lib/download";
+import { toast } from "@/store/toast.store";
 
 const PERMISSION_CODE = "ADMIN_ROLES";
 
@@ -22,6 +25,19 @@ export function RolesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Role | null>(null);
   const [deleting, setDeleting] = useState<Role | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await downloadSpreadsheet("/roles/export", { search }, "roles.xlsx");
+      toast({ title: "Export complete", description: "The Excel file has been downloaded.", variant: "success" });
+    } catch {
+      toast({ title: "Error", description: "Unable to export the data.", variant: "error" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   function handleSubmit(values: RoleFormValues) {
     if (editing) updateMutation.mutate({ id: editing.idRl, input: values }, { onSuccess: () => setFormOpen(false) });
@@ -40,15 +56,16 @@ export function RolesPage() {
         title="Roles"
         description="Manage application roles that can be assigned to users through groups."
         breadcrumb={[{ label: "Administration" }, { label: "Roles" }]}
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search for a role..."
         actions={
           <RequirePermission code={PERMISSION_CODE} action="ajout">
             <Button leftIcon={<FiPlus size={16} />} onClick={() => { setEditing(null); setFormOpen(true); }}>New role</Button>
           </RequirePermission>
         }
       />
+      <SearchFilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Search for a role..."
+        permissionCode="ADMIN_ROLES"
+        onExport={handleExport}
+        isExporting={isExporting} />
       <PageCard>
         <DataTable
           columns={columns}

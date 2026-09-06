@@ -3,6 +3,8 @@ package com.stockpro.controller.stock;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.dto.stock.CategorieDTO;
 import com.stockpro.service.stock.CategorieService;
+import com.stockpro.util.ExcelExporter;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,20 @@ public class CategorieController {
                 ? categorieService.findAll(pageable)
                 : categorieService.search(search, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
+    }
+
+    @Operation(summary = "Export categories (search) to Excel (.xlsx)")
+    @GetMapping("/export")
+    @PreAuthorize("@accessGuard.can(authentication, 'CATEGORIES', 'EXPORT')")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String search) {
+        List<CategorieDTO> categories = (search == null || search.isBlank())
+                ? categorieService.findAll(Pageable.unpaged()).getContent()
+                : categorieService.search(search, Pageable.unpaged()).getContent();
+        List<Object[]> rows = categories.stream()
+                .map(c -> new Object[]{c.getCodeCategorie(), c.getNomCategorie(), c.getDescription()})
+                .toList();
+        return ExcelExporter.asResponse("categories.xlsx", "Categories",
+                new String[]{"Code", "Name", "Description"}, rows);
     }
 
     @GetMapping("/{id}")

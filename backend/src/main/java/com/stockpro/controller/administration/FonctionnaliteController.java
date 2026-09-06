@@ -3,6 +3,7 @@ package com.stockpro.controller.administration;
 import com.stockpro.dto.administration.FonctionnaliteDTO;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.service.administration.FonctionnaliteService;
+import com.stockpro.util.ExcelExporter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,10 @@ public class FonctionnaliteController {
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_FONCTIONNALITES', 'CONSULTATION')")
     @GetMapping
     public ResponseEntity<PageResponseDTO<FonctionnaliteDTO>> getAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean actif,
             @PageableDefault(size = 20, sort = "libelle") Pageable pageable) {
-        Page<FonctionnaliteDTO> page = fonctionnaliteService.findAll(pageable);
+        Page<FonctionnaliteDTO> page = fonctionnaliteService.findAllWithFilters(search, actif, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
     }
 
@@ -40,6 +43,19 @@ public class FonctionnaliteController {
             @PageableDefault(size = 20, sort = "libelle") Pageable pageable) {
         Page<FonctionnaliteDTO> page = fonctionnaliteService.search(q, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
+    }
+
+    @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_FONCTIONNALITES', 'EXPORT')")
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean actif) {
+        List<FonctionnaliteDTO> fonctionnalites = fonctionnaliteService.findAllWithFilters(search, actif, Pageable.unpaged()).getContent();
+        List<Object[]> rows = fonctionnalites.stream()
+                .map(f -> new Object[]{f.getCodeFonc(), f.getLibelle(), f.getDescription(), f.getOrderAffichage(), f.getActif()})
+                .toList();
+        return ExcelExporter.asResponse("features.xlsx", "Features",
+                new String[]{"Code", "Name", "Description", "Order", "Active"}, rows);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_FONCTIONNALITES', 'CONSULTATION')")

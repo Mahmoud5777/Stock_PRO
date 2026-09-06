@@ -5,6 +5,8 @@ import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.entity.administration.User;
 import com.stockpro.mapper.administration.UserMapper;
 import com.stockpro.service.administration.UserService;
+import com.stockpro.util.ExcelExporter;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -38,6 +41,28 @@ public class UserController {
 
         Page<UserDTO> page = userService.findAll(search, etatCompte, siteId, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
+    }
+
+    @Operation(summary = "Export users (search + filters) to Excel (.xlsx)")
+    @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_UTILISATEURS', 'EXPORT')")
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean etatCompte,
+            @RequestParam(required = false) UUID siteId) {
+        List<UserDTO> users = userService.findAll(search, etatCompte, siteId, Pageable.unpaged()).getContent();
+        List<Object[]> rows = users.stream()
+                .map(u -> new Object[]{
+                        u.getNomComplet(),
+                        u.getLogin(),
+                        u.getEmail(),
+                        u.getTelephone(),
+                        u.getEtatCompte(),
+                        u.getDateCreation()
+                })
+                .toList();
+        return ExcelExporter.asResponse("users.xlsx", "Users",
+                new String[]{"Full name", "Login", "Email", "Phone", "Active", "Created on"}, rows);
     }
 
     // ─── Transition : redirige l'ancien /search (à supprimer plus tard) ───

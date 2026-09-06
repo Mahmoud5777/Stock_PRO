@@ -7,6 +7,7 @@ import { CategorieFormModal } from "../components/CategorieFormModal";
 import type { Categorie } from "../types/categorie.types";
 import type { CategorieFormValues } from "../validation/categorie.validation";
 import { CrudPageHeader } from "@/features/administration/shared/components/CrudPageHeader";
+import { SearchFilterBar } from "@/features/administration/shared/components/SearchFilterBar";
 import { PageCard } from "@/features/administration/shared/components/PageCard";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { Pagination } from "@/components/ui/Pagination";
@@ -14,6 +15,8 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { RequirePermission } from "@/features/auth/components/RequirePermission";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { downloadSpreadsheet } from "@/lib/download";
+import { toast } from "@/store/toast.store";
 
 const PERMISSION_CODE = "CATEGORIES";
 
@@ -26,6 +29,19 @@ export function CategoriesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Categorie | null>(null);
   const [deleting, setDeleting] = useState<Categorie | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await downloadSpreadsheet("/categories/export", { search }, "categories.xlsx");
+      toast({ title: "Export complete", description: "The Excel file has been downloaded.", variant: "success" });
+    } catch {
+      toast({ title: "Error", description: "Unable to export the data.", variant: "error" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   function handleSubmit(values: CategorieFormValues) {
     if (editing) updateMutation.mutate({ id: editing.idCategorie, input: values }, { onSuccess: () => setFormOpen(false) });
@@ -45,9 +61,6 @@ export function CategoriesPage() {
         title="Categories"
         description="Organize your articles by category."
         breadcrumb={[{ label: "Stock" }, { label: "Categories" }]}
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search for a category..."
         actions={
           <RequirePermission code={PERMISSION_CODE} action="ajout">
             <Button leftIcon={<FiPlus size={16} />} onClick={() => { setEditing(null); setFormOpen(true); }}>
@@ -56,6 +69,10 @@ export function CategoriesPage() {
           </RequirePermission>
         }
       />
+      <SearchFilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Search for a category..."
+        permissionCode="CATEGORIES"
+        onExport={handleExport}
+        isExporting={isExporting} />
       <PageCard>
         <DataTable
           columns={columns}

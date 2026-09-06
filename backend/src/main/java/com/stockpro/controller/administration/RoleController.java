@@ -3,6 +3,7 @@ package com.stockpro.controller.administration;
 import com.stockpro.dto.administration.RoleDTO;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.service.administration.RoleService;
+import com.stockpro.util.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,8 +30,11 @@ public class RoleController {
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_ROLES', 'CONSULTATION')")
     @GetMapping
     public ResponseEntity<PageResponseDTO<RoleDTO>> getAll(
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "libelle") Pageable pageable) {
-        Page<RoleDTO> page = roleService.findAll(pageable);
+        Page<RoleDTO> page = (search == null || search.isBlank())
+                ? roleService.findAll(pageable)
+                : roleService.search(search, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
     }
 
@@ -48,6 +52,20 @@ public class RoleController {
     @GetMapping("/all")
     public ResponseEntity<List<RoleDTO>> getAllUnpaged() {
         return ResponseEntity.ok(roleService.findAll());
+    }
+
+    @Operation(summary = "Export roles (search) to Excel (.xlsx)")
+    @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_ROLES', 'EXPORT')")
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String search) {
+        List<RoleDTO> roles = (search == null || search.isBlank())
+                ? roleService.findAll(Pageable.unpaged()).getContent()
+                : roleService.search(search, Pageable.unpaged()).getContent();
+        List<Object[]> rows = roles.stream()
+                .map(r -> new Object[]{r.getCodeRole(), r.getLibelle(), r.getDescription()})
+                .toList();
+        return ExcelExporter.asResponse("roles.xlsx", "Roles",
+                new String[]{"Code", "Name", "Description"}, rows);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_ROLES', 'CONSULTATION')")

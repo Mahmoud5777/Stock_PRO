@@ -42,8 +42,8 @@ public class InventaireServiceImpl implements InventaireService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<InventaireDTO> findAll(UUID idSite, Pageable pageable) {
-        return inventaireRepository.findAllWithFilters(idSite, pageable).map(i -> mapper.toDto(i, false));
+    public Page<InventaireDTO> findAll(UUID idSite, String search, StatutInventaire statut, Pageable pageable) {
+        return inventaireRepository.findAllWithFilters(idSite, search, statut, pageable).map(i -> mapper.toDto(i, false));
     }
 
     @Override

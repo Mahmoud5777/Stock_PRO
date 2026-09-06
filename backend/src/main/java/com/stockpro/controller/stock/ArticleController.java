@@ -4,6 +4,8 @@ import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.dto.stock.ArticleDTO;
 import com.stockpro.dto.stock.StockSiteDTO;
 import com.stockpro.service.stock.ArticleService;
+import com.stockpro.util.ExcelExporter;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -34,9 +36,29 @@ public class ArticleController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) UUID idCategorie,
             @RequestParam(required = false) UUID idFournisseur,
+            @RequestParam(required = false) Boolean actif,
             Pageable pageable) {
-        var page = articleService.search(search, idCategorie, idFournisseur, pageable);
+        var page = articleService.search(search, idCategorie, idFournisseur, actif, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
+    }
+
+    @Operation(summary = "Export articles (search + filters) to Excel (.xlsx)")
+    @GetMapping("/export")
+    @PreAuthorize("@accessGuard.can(authentication, 'ARTICLES', 'EXPORT')")
+    public ResponseEntity<byte[]> export(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) UUID idCategorie,
+            @RequestParam(required = false) UUID idFournisseur,
+            @RequestParam(required = false) Boolean actif) {
+        List<ArticleDTO> articles = articleService.search(search, idCategorie, idFournisseur, actif, Pageable.unpaged()).getContent();
+        List<Object[]> rows = articles.stream()
+                .map(a -> new Object[]{
+                        a.getCodeArticle(), a.getNomArticle(), a.getNomCategorie(), a.getNomFournisseur(),
+                        a.getUnite(), a.getQuantiteStock(), a.getSeuilAlerte(), a.getPrixAchat(), a.getPrixVente(), a.getActif()
+                })
+                .toList();
+        return ExcelExporter.asResponse("articles.xlsx", "Articles",
+                new String[]{"Code", "Name", "Category", "Supplier", "Unit", "Stock", "Alert threshold", "Purchase price", "Sale price", "Active"}, rows);
     }
 
     @GetMapping("/alertes")

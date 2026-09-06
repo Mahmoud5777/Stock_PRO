@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface ArticleService {
     List<ArticleDTO> findAll();
     Page<ArticleDTO> findAll(Pageable pageable);
-    Page<ArticleDTO> search(String query, UUID idCategorie, UUID idFournisseur, Pageable pageable);
+    Page<ArticleDTO> search(String query, UUID idCategorie, UUID idFournisseur, Boolean actif, Pageable pageable);
     ArticleDTO findById(UUID id);
     ArticleDTO create(ArticleDTO dto);
     ArticleDTO update(UUID id, ArticleDTO dto);

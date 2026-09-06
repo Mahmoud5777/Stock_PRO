@@ -3,6 +3,8 @@ package com.stockpro.controller.stock;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.dto.stock.FournisseurDTO;
 import com.stockpro.service.stock.FournisseurService;
+import com.stockpro.util.ExcelExporter;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,20 @@ public class FournisseurController {
                 ? fournisseurService.findAll(pageable)
                 : fournisseurService.search(search, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
+    }
+
+    @Operation(summary = "Export suppliers (search) to Excel (.xlsx)")
+    @GetMapping("/export")
+    @PreAuthorize("@accessGuard.can(authentication, 'FOURNISSEURS', 'EXPORT')")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String search) {
+        List<FournisseurDTO> fournisseurs = (search == null || search.isBlank())
+                ? fournisseurService.findAll(Pageable.unpaged()).getContent()
+                : fournisseurService.search(search, Pageable.unpaged()).getContent();
+        List<Object[]> rows = fournisseurs.stream()
+                .map(f -> new Object[]{f.getCodeFournisseur(), f.getNomFournisseur(), f.getContact(), f.getTelephone(), f.getEmail(), f.getAdresse()})
+                .toList();
+        return ExcelExporter.asResponse("suppliers.xlsx", "Suppliers",
+                new String[]{"Code", "Name", "Contact", "Phone", "Email", "Address"}, rows);
     }
 
     @GetMapping("/{id}")

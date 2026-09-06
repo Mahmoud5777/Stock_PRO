@@ -51,9 +51,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ArticleDTO> search(String query, UUID idCategorie, UUID idFournisseur, Pageable pageable) {
+    public Page<ArticleDTO> search(String query, UUID idCategorie, UUID idFournisseur, Boolean actif, Pageable pageable) {
         Page<ArticleDTO> page = articleRepository
-                .findAllWithFilters(query, idCategorie, idFournisseur, pageable)
+                .findAllWithFilters(query, idCategorie, idFournisseur, actif, pageable)
                 .map(mapper::toDto);
         enrichirQuantites(page.getContent());
         return page;

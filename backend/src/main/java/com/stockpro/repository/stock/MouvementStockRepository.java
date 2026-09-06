@@ -38,4 +38,6 @@ public interface MouvementStockRepository extends JpaRepository<MouvementStock, 
             Pageable pageable);
 
     List<MouvementStock> findTop10ByOrderByDateMouvementDesc();
+
+    List<MouvementStock> findByDateMouvementAfter(java.time.LocalDateTime after);
 }

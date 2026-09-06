@@ -12,6 +12,7 @@ public interface FonctionnaliteService {
     List<FonctionnaliteDTO> findAll();
     Page<FonctionnaliteDTO> findAll(Pageable pageable);
     Page<FonctionnaliteDTO> search(String query, Pageable pageable);
+    Page<FonctionnaliteDTO> findAllWithFilters(String search, Boolean actif, Pageable pageable);
     FonctionnaliteDTO findById(UUID id);
     List<FonctionnaliteDTO> findByApplication(UUID idApp);
     List<FonctionnaliteDTO> findRacines();

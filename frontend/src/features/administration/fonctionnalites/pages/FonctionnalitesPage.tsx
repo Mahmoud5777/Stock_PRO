@@ -8,6 +8,7 @@ import type { Fonctionnalite } from "../types/fonctionnalite.types";
 import type { FonctionnaliteFormValues } from "../validation/fonctionnalite.validation";
 import { CrudPageHeader } from "@/features/administration/shared/components/CrudPageHeader";
 import { PageCard } from "@/features/administration/shared/components/PageCard";
+import { SearchFilterBar, type FilterDef } from "@/features/administration/shared/components/SearchFilterBar";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/Button";
@@ -15,15 +16,50 @@ import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { RequirePermission } from "@/features/auth/components/RequirePermission";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { downloadSpreadsheet } from "@/lib/download";
+import { toast } from "@/store/toast.store";
 import { translateFoncLabel } from "../utils/fonctionnalite-labels";
 
 const PERMISSION_CODE = "ADMIN_FONCTIONNALITES";
 
+const FILTER_DEFS: FilterDef[] = [
+  { key: "actif", label: "Status", options: [{ value: "true", label: "Active" }, { value: "false", label: "Inactive" }] },
+];
+
 export function FonctionnalitesPage() {
-  const { page, setPage, search, setSearch, sortKey, sortDirection, onSortChange, listQuery, createMutation, updateMutation, removeMutation } = useFonctionnalites();
+  const { page, setPage, search, setSearch, sortKey, sortDirection, onSortChange, filters, updateFilters, resetFilters, listQuery, createMutation, updateMutation, removeMutation } = useFonctionnalites();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Fonctionnalite | null>(null);
   const [deleting, setDeleting] = useState<Fonctionnalite | null>(null);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+
+  const filterValues = { actif: filters.actif === undefined ? undefined : String(filters.actif) };
+
+  function handleFilterValueChange(key: string, value: string | undefined) {
+    updateFilters({ [key]: value === undefined ? undefined : value === "true" });
+  }
+  function handleRemoveFilter(key: string) {
+    setActiveFilters((prev) => prev.filter((k) => k !== key));
+    updateFilters({ [key]: undefined });
+  }
+  function handleResetAll() {
+    setActiveFilters([]);
+    resetFilters();
+    setSearch("");
+  }
+
+  const [isExporting, setIsExporting] = useState(false);
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await downloadSpreadsheet("/fonctionnalites/export", { search, filters }, "features.xlsx");
+      toast({ title: "Export complete", description: "The Excel file has been downloaded.", variant: "success" });
+    } catch {
+      toast({ title: "Error", description: "Unable to export the data.", variant: "error" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   function handleSubmit(values: FonctionnaliteFormValues) {
     const input = { ...values, idFoncMere: values.idFoncMere || null };
@@ -45,14 +81,26 @@ export function FonctionnalitesPage() {
         title="Features"
         description="Define the application's features and their associated menu entries."
         breadcrumb={[{ label: "Administration" }, { label: "Features" }]}
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search for a feature..."
         actions={
           <RequirePermission code={PERMISSION_CODE} action="ajout">
             <Button leftIcon={<FiPlus size={16} />} onClick={() => { setEditing(null); setFormOpen(true); }}>New feature</Button>
           </RequirePermission>
         }
+      />
+      <SearchFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search for a feature..."
+        filterDefs={FILTER_DEFS}
+        activeFilterKeys={activeFilters}
+        filterValues={filterValues}
+        onFilterValueChange={handleFilterValueChange}
+        onAddFilter={(key) => setActiveFilters((prev) => [...prev, key])}
+        onRemoveFilter={handleRemoveFilter}
+        onResetAll={handleResetAll}
+        permissionCode={PERMISSION_CODE}
+        onExport={handleExport}
+        isExporting={isExporting}
       />
       <PageCard>
         <DataTable

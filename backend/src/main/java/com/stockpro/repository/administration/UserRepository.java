@@ -15,6 +15,7 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByLogin(String login);
     Optional<User> findByEmail(String email);
+    long countByEtatCompteTrue();
 
     // Conservé temporairement pour compatibilité
     Page<User> findByNomCompletContainingIgnoreCaseOrLoginContainingIgnoreCase(

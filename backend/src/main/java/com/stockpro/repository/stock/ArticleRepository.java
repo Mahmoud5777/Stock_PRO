@@ -24,6 +24,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
                OR LOWER(a.codeArticle) LIKE LOWER(CONCAT('%', :search, '%')))
           AND (:idCategorie IS NULL OR a.categorie.idCategorie = :idCategorie)
           AND (:idFournisseur IS NULL OR a.fournisseur.idFournisseur = :idFournisseur)
+          AND (:actif IS NULL OR a.actif = :actif)
         """,
             countQuery = """
         SELECT COUNT(a) FROM Article a
@@ -32,11 +33,13 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
                OR LOWER(a.codeArticle) LIKE LOWER(CONCAT('%', :search, '%')))
           AND (:idCategorie IS NULL OR a.categorie.idCategorie = :idCategorie)
           AND (:idFournisseur IS NULL OR a.fournisseur.idFournisseur = :idFournisseur)
+          AND (:actif IS NULL OR a.actif = :actif)
         """)
     Page<Article> findAllWithFilters(
             @Param("search") String search,
             @Param("idCategorie") UUID idCategorie,
             @Param("idFournisseur") UUID idFournisseur,
+            @Param("actif") Boolean actif,
             Pageable pageable);
 
     List<Article> findByActifTrue();

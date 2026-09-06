@@ -15,4 +15,6 @@ public interface LogAccesRepository extends JpaRepository<LogAcces, String> {
     Page<LogAcces> findByAction(AuditAction action, Pageable pageable);
 
     Page<LogAcces> findByLoginContainingIgnoreCaseAndAction(String login, AuditAction action, Pageable pageable);
+
+    java.util.List<LogAcces> findTop10ByActionInOrderByDateAccesDesc(java.util.List<AuditAction> actions);
 }

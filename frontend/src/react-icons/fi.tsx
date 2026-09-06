@@ -367,6 +367,16 @@ const FiDollarSign = createIcon("FiDollarSign", () => (
   </>
 ));
 
+const FiFilter = createIcon("FiFilter", () => <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />);
+
+const FiDownload = createIcon("FiDownload", () => (
+  <>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <path d="M7 10l5 5 5-5" />
+    <path d="M12 15V3" />
+  </>
+));
+
 export {
   FiActivity,
   FiAlertTriangle,
@@ -389,9 +399,11 @@ export {
   FiChevronsRight,
   FiClipboard,
   FiDollarSign,
+  FiDownload,
   FiEdit2,
   FiEye,
   FiFileText,
+  FiFilter,
   FiHome,
   FiInbox,
   FiInfo,

@@ -5,7 +5,8 @@ import type { Fonctionnalite, FonctionnaliteInput } from "../types/fonctionnalit
 
 export const fonctionnaliteService = {
   async list(params: PageRequest): Promise<Page<Fonctionnalite>> {
-    const { data } = await apiClient.get<Page<Fonctionnalite>>("/fonctionnalites", { params });
+    const { filters, ...rest } = params;
+    const { data } = await apiClient.get<Page<Fonctionnalite>>("/fonctionnalites", { params: { ...rest, ...filters } });
     return data;
   },
   async create(input: FonctionnaliteInput): Promise<Fonctionnalite> {

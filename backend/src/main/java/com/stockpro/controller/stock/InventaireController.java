@@ -4,7 +4,10 @@ import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.dto.stock.InventaireCreateDTO;
 import com.stockpro.dto.stock.InventaireDTO;
 import com.stockpro.dto.stock.InventaireLigneSaisieDTO;
+import com.stockpro.entity.stock.StatutInventaire;
 import com.stockpro.service.stock.InventaireService;
+import com.stockpro.util.ExcelExporter;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,8 +29,26 @@ public class InventaireController {
     @GetMapping
     @PreAuthorize("@accessGuard.can(authentication, 'INVENTAIRE', 'CONSULTATION')")
     public ResponseEntity<PageResponseDTO<InventaireDTO>> findAll(
-            @RequestParam(required = false) UUID idSite, Pageable pageable) {
-        return ResponseEntity.ok(PageResponseDTO.of(inventaireService.findAll(idSite, pageable)));
+            @RequestParam(required = false) UUID idSite,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) StatutInventaire statut,
+            Pageable pageable) {
+        return ResponseEntity.ok(PageResponseDTO.of(inventaireService.findAll(idSite, search, statut, pageable)));
+    }
+
+    @Operation(summary = "Export inventories (search + filters) to Excel (.xlsx)")
+    @GetMapping("/export")
+    @PreAuthorize("@accessGuard.can(authentication, 'INVENTAIRE', 'EXPORT')")
+    public ResponseEntity<byte[]> export(
+            @RequestParam(required = false) UUID idSite,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) StatutInventaire statut) {
+        List<InventaireDTO> inventaires = inventaireService.findAll(idSite, search, statut, Pageable.unpaged()).getContent();
+        List<Object[]> rows = inventaires.stream()
+                .map(i -> new Object[]{i.getCodeInventaire(), i.getNomSite(), i.getNomResponsable(), i.getStatut(), i.getDateInventaire(), i.getDateCloture()})
+                .toList();
+        return ExcelExporter.asResponse("inventory.xlsx", "Inventory",
+                new String[]{"Code", "Site", "Manager", "Status", "Opened on", "Closed on"}, rows);
     }
 
     @GetMapping("/{id}")

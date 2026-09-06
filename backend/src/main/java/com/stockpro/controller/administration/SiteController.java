@@ -3,6 +3,7 @@ package com.stockpro.controller.administration;
 import com.stockpro.dto.administration.SiteDTO;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.service.administration.SiteService;
+import com.stockpro.util.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,8 +30,11 @@ public class SiteController {
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_SITES', 'CONSULTATION')")
     @GetMapping
     public ResponseEntity<PageResponseDTO<SiteDTO>> getAll(
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "nomSite") Pageable pageable) {
-        Page<SiteDTO> page = siteService.findAll(pageable);
+        Page<SiteDTO> page = (search == null || search.isBlank())
+                ? siteService.findAll(pageable)
+                : siteService.search(search, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
     }
 
@@ -41,6 +45,20 @@ public class SiteController {
             @PageableDefault(size = 20, sort = "nomSite") Pageable pageable) {
         Page<SiteDTO> page = siteService.search(q, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
+    }
+
+    @Operation(summary = "Export sites (search + filters) to Excel (.xlsx)")
+    @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_SITES', 'EXPORT')")
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String search) {
+        List<SiteDTO> sites = (search == null || search.isBlank())
+                ? siteService.findAll(Pageable.unpaged()).getContent()
+                : siteService.search(search, Pageable.unpaged()).getContent();
+        List<Object[]> rows = sites.stream()
+                .map(s -> new Object[]{s.getCodeSite(), s.getNomSite(), s.getDescription(), s.getAddress()})
+                .toList();
+        return ExcelExporter.asResponse("sites.xlsx", "Sites",
+                new String[]{"Code", "Name", "Description", "Address"}, rows);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_SITES', 'CONSULTATION')")

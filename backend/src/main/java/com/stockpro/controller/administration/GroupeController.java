@@ -3,6 +3,7 @@ package com.stockpro.controller.administration;
 import com.stockpro.dto.administration.GroupeDTO;
 import com.stockpro.dto.common.PageResponseDTO;
 import com.stockpro.service.administration.GroupeService;
+import com.stockpro.util.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,8 +30,11 @@ public class GroupeController {
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_GROUPES', 'CONSULTATION')")
     @GetMapping
     public ResponseEntity<PageResponseDTO<GroupeDTO>> getAll(
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "libelle") Pageable pageable) {
-        Page<GroupeDTO> page = groupeService.findAll(pageable);
+        Page<GroupeDTO> page = (search == null || search.isBlank())
+                ? groupeService.findAll(pageable)
+                : groupeService.search(search, pageable);
         return ResponseEntity.ok(PageResponseDTO.of(page));
     }
 
@@ -48,6 +52,20 @@ public class GroupeController {
     @GetMapping("/all")
     public ResponseEntity<List<GroupeDTO>> getAllUnpaged() {
         return ResponseEntity.ok(groupeService.findAll());
+    }
+
+    @Operation(summary = "Export groups (search) to Excel (.xlsx)")
+    @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_GROUPES', 'EXPORT')")
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String search) {
+        List<GroupeDTO> groupes = (search == null || search.isBlank())
+                ? groupeService.findAll(Pageable.unpaged()).getContent()
+                : groupeService.search(search, Pageable.unpaged()).getContent();
+        List<Object[]> rows = groupes.stream()
+                .map(g -> new Object[]{g.getCodeGroupe(), g.getLibelle(), g.getDescription()})
+                .toList();
+        return ExcelExporter.asResponse("groups.xlsx", "Groups",
+                new String[]{"Code", "Name", "Description"}, rows);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_GROUPES', 'CONSULTATION')")

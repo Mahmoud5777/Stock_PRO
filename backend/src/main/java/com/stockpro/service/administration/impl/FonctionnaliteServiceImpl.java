@@ -51,6 +51,13 @@ public class FonctionnaliteServiceImpl implements FonctionnaliteService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<FonctionnaliteDTO> findAllWithFilters(String search, Boolean actif, Pageable pageable) {
+        return fonctionnaliteRepository.findAllWithFilters(search, actif, pageable)
+                .map(fonctionnaliteMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public FonctionnaliteDTO findById(UUID id) {
         return fonctionnaliteMapper.toDto(findEntityById(id));
     }
