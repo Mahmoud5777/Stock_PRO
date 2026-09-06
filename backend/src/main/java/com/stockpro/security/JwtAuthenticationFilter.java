@@ -48,14 +48,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(login);
+            try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(login);
 
-            // ═══ FIX SÉCURITÉ : compte désactivé = pas d'auth même avec JWT valide ═══
-            if (jwtService.isTokenValid(jwt, userDetails) && userDetails.isEnabled()) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                // ═══ FIX SÉCURITÉ : compte désactivé = pas d'auth même avec JWT valide ═══
+                if (jwtService.isTokenValid(jwt, userDetails) && userDetails.isEnabled()) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                // Utilisateur introuvable/supprimé alors que le JWT est encore signé valide :
+                // on ignore simplement l'authentification (comme pour un token invalide)
+                // plutôt que de laisser l'exception remonter et provoquer un 500,
+                // y compris sur les endpoints publics (ex: /api/auth/logout).
             }
         }
 
