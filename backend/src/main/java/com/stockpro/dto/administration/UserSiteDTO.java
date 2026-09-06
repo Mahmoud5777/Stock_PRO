@@ -3,7 +3,7 @@ package com.stockpro.dto.administration;
 import com.stockpro.entity.administration.Site;
 import com.stockpro.entity.administration.User;
 import com.stockpro.mapper.administration.UserSiteMapper;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -19,10 +19,10 @@ public class UserSiteDTO {
 
     private UUID idUtilSite;
 
-    @NotBlank(message = "L'idUtil est obligatoire")
+    @NotNull(message = "L'idUtil est obligatoire")
     private UUID idUtil;
 
-    @NotBlank(message = "L'idSite est obligatoire")
+    @NotNull(message = "L'idSite est obligatoire")
     private UUID idSite;
 
     private LocalDate dateAffectation;

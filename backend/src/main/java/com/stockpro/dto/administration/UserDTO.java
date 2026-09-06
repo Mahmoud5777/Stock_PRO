@@ -27,8 +27,12 @@ public class UserDTO {
     private String login;
 
     // Ecriture uniquement : jamais renvoyé dans les réponses JSON
+    // Requis à la création, optionnel en modification (réinitialisation).
+    // Pas de @Size ici : elle échouerait sur "" (taille 0) envoyé par le formulaire
+    // d'édition quand l'utilisateur ne change pas son mot de passe. La longueur
+    // minimale est vérifiée dans UserServiceImpl, uniquement quand un mot de passe
+    // est réellement fourni (create, ou update avec changement de mot de passe).
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
     private String motPasse;
 
     @NotBlank(message = "L'email est obligatoire")

@@ -75,7 +75,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     private Role getEntity(UUID id) {
-        return roleRepository.findById(id.toString().replace("-", " "))
+        return roleRepository.findById(id.toString().replace("-", ""))
                 .orElseThrow(() -> new ResourceNotFoundException("Role", id));
     }
 }

@@ -81,7 +81,10 @@ export const userService = {
       email: input.email,
       telephone: input.telephone,
       etatCompte: input.etatCompte,
-      motPasse: input.motPasse,
+      // Ne pas envoyer un mot de passe vide : le backend le validerait
+      // avec @Size(min = 6) et rejetterait la requête (400) si l'utilisateur
+      // ne change pas son mot de passe lors de la modification.
+      motPasse: input.motPasse ? input.motPasse : undefined,
     });
     await syncSites(id, input.siteIds);
     const allSites = await siteService.listAll();

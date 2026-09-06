@@ -96,7 +96,7 @@ public class GroupeRoleServiceImpl implements GroupeRoleService {
     // Recupere l'entite GroupeRole ou leve une exception si absente.
     // Reste interne au service : le contrat public ne manipule plus que des DTO.
     private GroupeRole findEntityById(UUID id) {
-        return groupeRoleRepository.findById(id.toString().replace("-", " "))
+        return groupeRoleRepository.findById(id.toString().replace("-", ""))
                 .orElseThrow(() -> new ResourceNotFoundException("GroupeRole", id));
     }
 
@@ -104,14 +104,14 @@ public class GroupeRoleServiceImpl implements GroupeRoleService {
         if (groupeRole.getGroupe() == null || groupeRole.getGroupe().getIdGr() == null) {
             throw new IllegalArgumentException("Le groupe (idGr) est obligatoire");
         }
-        Groupe groupe = groupeRepository.findById(groupeRole.getGroupe().getIdGr().toString().replace("-", " "))
+        Groupe groupe = groupeRepository.findById(groupeRole.getGroupe().getIdGr().toString().replace("-", ""))
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupeRole.getGroupe().getIdGr()));
         groupeRole.setGroupe(groupe);
 
         if (groupeRole.getRole() == null || groupeRole.getRole().getIdRl() == null) {
             throw new IllegalArgumentException("Le role (idRl) est obligatoire");
         }
-        Role role = roleRepository.findById(groupeRole.getRole().getIdRl().toString().replace("-", " "))
+        Role role = roleRepository.findById(groupeRole.getRole().getIdRl().toString().replace("-", ""))
                 .orElseThrow(() -> new ResourceNotFoundException("Role", groupeRole.getRole().getIdRl()));
         groupeRole.setRole(role);
     }

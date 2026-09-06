@@ -57,12 +57,12 @@ public class AuthorizationService {
             List<UserSiteDroits> droits = userSiteDroitsRepository.findByUserSite_IdUtilSite(userSite.getIdUtilSite());
             for (UserSiteDroits d : droits) {
                 if (d.getProfil() != null) {
-                    profilsApplicables.put(d.getProfil().getIdPr().toString().replace("-", " "), d.getProfil());
+                    profilsApplicables.put(d.getProfil().getIdPr().toString().replace("-", ""), d.getProfil());
                 }
                 if (d.getGroupe() != null) {
                     for (GroupeProfil gp : groupeProfilRepository.findByGroupe_IdGr(d.getGroupe().getIdGr())) {
                         if (Boolean.TRUE.equals(gp.getActif()) && gp.getProfil() != null) {
-                            profilsApplicables.put(gp.getProfil().getIdPr().toString().replace("-", " "), gp.getProfil());
+                            profilsApplicables.put(gp.getProfil().getIdPr().toString().replace("-", ""), gp.getProfil());
                         }
                     }
                 }
@@ -77,7 +77,7 @@ public class AuthorizationService {
                 Fonctionnalite f = pd.getFonctionnalite();
                 if (f == null) continue;
 
-                FonctionnaliteAvecDroitsDTO existing = merged.get(f.getIdFonc());
+                FonctionnaliteAvecDroitsDTO existing = merged.get(f.getIdFonc().toString().replace("-", ""));
                 DroitsDTO nouveauxDroits = DroitsDTO.builder()
                         .consultation(Boolean.TRUE.equals(pd.getConsultation()))
                         .ajout(Boolean.TRUE.equals(pd.getAjout()))
@@ -88,7 +88,7 @@ public class AuthorizationService {
                         .build();
 
                 if (existing == null) {
-                    merged.put(f.getIdFonc().toString().replace("-", " "), FonctionnaliteAvecDroitsDTO.builder()
+                    merged.put(f.getIdFonc().toString().replace("-", ""), FonctionnaliteAvecDroitsDTO.builder()
                             .idFonctionnalite(f.getIdFonc())
                             .codFonctionnalite(f.getCodeFonc())
                             .libFonctionnalite(f.getLibelle())

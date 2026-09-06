@@ -75,7 +75,7 @@ public class ProfilServiceImpl implements ProfilService {
     }
 
     private Profil getEntity(UUID id) {
-        return profilRepository.findById(id.toString().replace("-", " "))
+        return profilRepository.findById(id.toString().replace("-", ""))
                 .orElseThrow(() -> new ResourceNotFoundException("Profil", id));
     }
 }

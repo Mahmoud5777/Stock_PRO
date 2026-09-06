@@ -83,6 +83,9 @@ public class UserServiceImpl implements UserService {
         if (user.getMotPasse() == null || user.getMotPasse().isBlank()) {
             throw new IllegalArgumentException("Le mot de passe est obligatoire à la création");
         }
+        if (user.getMotPasse().length() < 6) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 6 caractères");
+        }
         user.setMotPasse(passwordEncoder.encode(user.getMotPasse()));
         if (user.getEtatCompte() == null) {
             user.setEtatCompte(true);
@@ -104,6 +107,9 @@ public class UserServiceImpl implements UserService {
         existing.setNomComplet(user.getNomComplet());
         existing.setLogin(user.getLogin());
         if (user.getMotPasse() != null && !user.getMotPasse().isBlank()) {
+            if (user.getMotPasse().length() < 6) {
+                throw new IllegalArgumentException("Le mot de passe doit contenir au moins 6 caractères");
+            }
             existing.setMotPasse(passwordEncoder.encode(user.getMotPasse()));
         }
         existing.setEmail(user.getEmail());

@@ -1,6 +1,6 @@
 package com.stockpro.dto.administration;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.UUID;
@@ -14,10 +14,10 @@ public class ProfilDroitDTO {
 
     private UUID idProfilDroit;
 
-    @NotBlank(message = "L'idPr est obligatoire")
+    @NotNull(message = "L'idPr est obligatoire")
     private UUID idPr;
 
-    @NotBlank(message = "L'idFonc est obligatoire")
+    @NotNull(message = "L'idFonc est obligatoire")
     private UUID idFonc;
 
     private Boolean consultation;

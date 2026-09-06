@@ -95,7 +95,7 @@ public class UserSiteServiceImpl implements UserSiteService {
         if (userSite.getUser() == null || userSite.getUser().getIdUtil() == null) {
             throw new IllegalArgumentException("L'utilisateur (idUtil) est obligatoire");
         }
-        User user = userRepository.findById(userSite.getIdUtilSite())
+        User user = userRepository.findById(userSite.getUser().getIdUtil())
                 .orElseThrow(() -> new ResourceNotFoundException("User", userSite.getUser().getIdUtil()));
         userSite.setUser(user);
 

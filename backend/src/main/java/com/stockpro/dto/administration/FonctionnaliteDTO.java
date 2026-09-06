@@ -1,6 +1,7 @@
 package com.stockpro.dto.administration;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -35,7 +36,7 @@ public class FonctionnaliteDTO {
 
     private Boolean actif;
 
-    @NotBlank(message = "L'idApp est obligatoire")
+    @NotNull(message = "L'idApp est obligatoire")
     private UUID idApp;
 
     private UUID idFoncMere;

@@ -60,13 +60,31 @@ public class UserSiteDroitsServiceImpl implements UserSiteDroitsService {
     }
 
     @Override
-    public UserSiteDroitsDTO create(UserSiteDroitsDTO userSiteDroits) {
-        userSiteDroits.setIdUserSiteDroit(null);
-        resolveRelations((userSiteDroits));
-        UserSiteDroits usd = userSiteDroitsMapper.toEntity(userSiteDroits);
+    public UserSiteDroitsDTO create(UserSiteDroitsDTO dto) {
+        dto.setIdUserSiteDroit(null);
+        resolveRelations(dto); // valide l'existence des IDs et lève une 404 claire si absents
+
+        // On charge les VRAIES entités persistées (comme le fait déjà update()),
+        // plutôt que de passer par le mapper qui crée des entités "stub" (juste l'ID posé,
+        // jamais chargées depuis la base). Sans cascade sur les relations @ManyToOne,
+        // Hibernate traite ces stubs comme des instances transitoires non sauvegardées
+        // et lève une TransientPropertyValueException au moment du save().
+        UserSiteDroits usd = UserSiteDroits.builder()
+                .dateAffectation(dto.getDateAffectation())
+                .userSite(userSiteRepository.findById(dto.getIdUtilSite()).orElseThrow())
+                .role(dto.getIdRl() != null
+                        ? roleRepository.findById(dto.getIdRl().toString().replace("-", "")).orElseThrow()
+                        : null)
+                .profil(dto.getIdPr() != null
+                        ? profilRepository.findById(dto.getIdPr().toString().replace("-", "")).orElseThrow()
+                        : null)
+                .groupe(dto.getIdGr() != null
+                        ? groupeRepository.findById(dto.getIdGr().toString().replace("-", "")).orElseThrow()
+                        : null)
+                .build();
 
         UserSiteDroits saved = userSiteDroitsRepository.save(usd);
-        return userSiteDroitsMapper.toDto(userSiteDroitsRepository.save(saved));
+        return userSiteDroitsMapper.toDto(saved);
     }
 
     @Override
@@ -86,19 +104,19 @@ public class UserSiteDroitsServiceImpl implements UserSiteDroitsService {
 
         existing.setRole(
                 dto.getIdRl() != null
-                        ? roleRepository.findById(dto.getIdRl().toString().replace("-", " ")).orElseThrow()
+                        ? roleRepository.findById(dto.getIdRl().toString().replace("-", "")).orElseThrow()
                         : null
         );
 
         existing.setProfil(
                 dto.getIdPr() != null
-                        ? profilRepository.findById(dto.getIdPr().toString().replace("-", " ")).orElseThrow()
+                        ? profilRepository.findById(dto.getIdPr().toString().replace("-", "")).orElseThrow()
                         : null
         );
 
         existing.setGroupe(
                 dto.getIdGr() != null
-                        ? groupeRepository.findById(dto.getIdGr().toString().replace("-", " ")).orElseThrow()
+                        ? groupeRepository.findById(dto.getIdGr().toString().replace("-", "")).orElseThrow()
                         : null
         );
 
@@ -125,17 +143,17 @@ public class UserSiteDroitsServiceImpl implements UserSiteDroitsService {
                 .orElseThrow(() -> new ResourceNotFoundException("UserSite", dto.getIdUtilSite()));
 
         if (dto.getIdRl() != null) {
-            roleRepository.findById(dto.getIdRl().toString().replace("-", " "))
+            roleRepository.findById(dto.getIdRl().toString().replace("-", ""))
                     .orElseThrow(() -> new ResourceNotFoundException("Role", dto.getIdRl()));
         }
 
         if (dto.getIdPr() != null) {
-            profilRepository.findById(dto.getIdPr().toString().replace("-", " "))
+            profilRepository.findById(dto.getIdPr().toString().replace("-", ""))
                     .orElseThrow(() -> new ResourceNotFoundException("Profil", dto.getIdPr()));
         }
 
         if (dto.getIdGr() != null) {
-            groupeRepository.findById(dto.getIdGr().toString().replace("-", " "))
+            groupeRepository.findById(dto.getIdGr().toString().replace("-", ""))
                     .orElseThrow(() -> new ResourceNotFoundException("Groupe", dto.getIdGr()));
         }
     }

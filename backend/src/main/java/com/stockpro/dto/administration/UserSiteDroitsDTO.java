@@ -1,6 +1,6 @@
 package com.stockpro.dto.administration;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ public class UserSiteDroitsDTO {
 
     private UUID idUserSiteDroit;
 
-    @NotBlank(message = "L'idUtilSite est obligatoire")
+    @NotNull(message = "L'idUtilSite est obligatoire")
     private UUID idUtilSite;
 
     private UUID idRl;
