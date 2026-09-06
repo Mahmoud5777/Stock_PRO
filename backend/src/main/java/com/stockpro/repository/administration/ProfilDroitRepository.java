@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ProfilDroitRepository extends JpaRepository<ProfilDroit, String> {
+public interface ProfilDroitRepository extends JpaRepository<ProfilDroit, UUID> {
     List<ProfilDroit> findByProfil_IdPr(UUID idPr);
     List<ProfilDroit> findByFonctionnalite_IdFonc(UUID idFonc);
 }

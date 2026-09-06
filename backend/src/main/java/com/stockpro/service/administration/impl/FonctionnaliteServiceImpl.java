@@ -112,13 +112,13 @@ public class FonctionnaliteServiceImpl implements FonctionnaliteService {
     // Recupere l'entite Fonctionnalite ou leve une exception si absente.
     // Reste interne au service : le contrat public ne manipule plus que des DTO.
     private Fonctionnalite findEntityById(UUID id) {
-        return fonctionnaliteRepository.findById(id.toString().replace("-", ""))
+        return fonctionnaliteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fonctionnalite", id));
     }
 
     private void resolveRelations(Fonctionnalite fonctionnalite) {
         if (fonctionnalite.getApplication() != null && fonctionnalite.getApplication().getIdApp() != null) {
-            Application application = applicationRepository.findById(fonctionnalite.getApplication().getIdApp().toString().replace("-", ""))
+            Application application = applicationRepository.findById(fonctionnalite.getApplication().getIdApp())
                     .orElseThrow(() -> new ResourceNotFoundException("Application", fonctionnalite.getApplication().getIdApp()));
             fonctionnalite.setApplication(application);
         } else if (fonctionnalite.getApplication() == null) {
@@ -126,7 +126,7 @@ public class FonctionnaliteServiceImpl implements FonctionnaliteService {
         }
 
         if (fonctionnalite.getFonctionMere() != null && fonctionnalite.getFonctionMere().getIdFonc() != null) {
-            Fonctionnalite mere = fonctionnaliteRepository.findById(fonctionnalite.getFonctionMere().getIdFonc().toString().replace("-", ""))
+            Fonctionnalite mere = fonctionnaliteRepository.findById(fonctionnalite.getFonctionMere().getIdFonc())
                     .orElseThrow(() -> new ResourceNotFoundException("Fonctionnalite (mere)", fonctionnalite.getFonctionMere().getIdFonc()));
             fonctionnalite.setFonctionMere(mere);
         } else {

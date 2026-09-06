@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface FonctionnaliteRepository extends JpaRepository<Fonctionnalite, String> {
+public interface FonctionnaliteRepository extends JpaRepository<Fonctionnalite, UUID> {
     Optional<Fonctionnalite> findByCodeFonc(String codeFonc);
     List<Fonctionnalite> findByApplication_IdApp(UUID idApp);
     List<Fonctionnalite> findByFonctionMere_IdFonc(UUID idFoncMere);

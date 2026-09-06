@@ -96,7 +96,7 @@ public class GroupeProfilServiceImpl implements GroupeProfilService {
     // Recupere l'entite GroupeProfil ou leve une exception si absente.
     // Reste interne au service : le contrat public ne manipule plus que des DTO.
     private GroupeProfil findEntityById(UUID id) {
-        return groupeProfilRepository.findById(id.toString().replace("-", ""))
+        return groupeProfilRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("GroupeProfil", id));
     }
 
@@ -104,14 +104,14 @@ public class GroupeProfilServiceImpl implements GroupeProfilService {
         if (groupeProfil.getGroupe() == null || groupeProfil.getGroupe().getIdGr() == null) {
             throw new IllegalArgumentException("Le groupe (idGr) est obligatoire");
         }
-        Groupe groupe = groupeRepository.findById(groupeProfil.getGroupe().getIdGr().toString().replace("-", ""))
+        Groupe groupe = groupeRepository.findById(groupeProfil.getGroupe().getIdGr())
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupeProfil.getGroupe().getIdGr()));
         groupeProfil.setGroupe(groupe);
 
         if (groupeProfil.getProfil() == null || groupeProfil.getProfil().getIdPr() == null) {
             throw new IllegalArgumentException("Le profil (idPr) est obligatoire");
         }
-        Profil profil = profilRepository.findById(groupeProfil.getProfil().getIdPr().toString().replace("-", ""))
+        Profil profil = profilRepository.findById(groupeProfil.getProfil().getIdPr())
                 .orElseThrow(() -> new ResourceNotFoundException("Profil", groupeProfil.getProfil().getIdPr()));
         groupeProfil.setProfil(profil);
     }

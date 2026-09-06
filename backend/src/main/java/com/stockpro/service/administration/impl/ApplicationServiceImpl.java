@@ -78,7 +78,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     // Recupere l'entite Application ou leve une exception si absente.
     // Reste interne au service : le contrat public ne manipule plus que des DTO.
     private Application findEntityById(UUID id) {
-        return applicationRepository.findById(id.toString().replace("-", ""))
+        return applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", id));
     }
 }

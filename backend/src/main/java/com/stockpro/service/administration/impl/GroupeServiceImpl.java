@@ -77,7 +77,7 @@ public class GroupeServiceImpl implements GroupeService {
     // Recupere l'entite Groupe ou leve une exception si absente.
     // Reste interne au service : le contrat public ne manipule plus que des DTO.
     private Groupe findEntityById(UUID id) {
-        return groupeRepository.findById(id.toString().replace("-", ""))
+        return groupeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", id));
     }
 }

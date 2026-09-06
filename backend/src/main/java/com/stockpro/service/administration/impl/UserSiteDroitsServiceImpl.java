@@ -73,13 +73,13 @@ public class UserSiteDroitsServiceImpl implements UserSiteDroitsService {
                 .dateAffectation(dto.getDateAffectation())
                 .userSite(userSiteRepository.findById(dto.getIdUtilSite()).orElseThrow())
                 .role(dto.getIdRl() != null
-                        ? roleRepository.findById(dto.getIdRl().toString().replace("-", "")).orElseThrow()
+                        ? roleRepository.findById(dto.getIdRl()).orElseThrow()
                         : null)
                 .profil(dto.getIdPr() != null
-                        ? profilRepository.findById(dto.getIdPr().toString().replace("-", "")).orElseThrow()
+                        ? profilRepository.findById(dto.getIdPr()).orElseThrow()
                         : null)
                 .groupe(dto.getIdGr() != null
-                        ? groupeRepository.findById(dto.getIdGr().toString().replace("-", "")).orElseThrow()
+                        ? groupeRepository.findById(dto.getIdGr()).orElseThrow()
                         : null)
                 .build();
 
@@ -104,19 +104,19 @@ public class UserSiteDroitsServiceImpl implements UserSiteDroitsService {
 
         existing.setRole(
                 dto.getIdRl() != null
-                        ? roleRepository.findById(dto.getIdRl().toString().replace("-", "")).orElseThrow()
+                        ? roleRepository.findById(dto.getIdRl()).orElseThrow()
                         : null
         );
 
         existing.setProfil(
                 dto.getIdPr() != null
-                        ? profilRepository.findById(dto.getIdPr().toString().replace("-", "")).orElseThrow()
+                        ? profilRepository.findById(dto.getIdPr()).orElseThrow()
                         : null
         );
 
         existing.setGroupe(
                 dto.getIdGr() != null
-                        ? groupeRepository.findById(dto.getIdGr().toString().replace("-", "")).orElseThrow()
+                        ? groupeRepository.findById(dto.getIdGr()).orElseThrow()
                         : null
         );
 
@@ -143,17 +143,17 @@ public class UserSiteDroitsServiceImpl implements UserSiteDroitsService {
                 .orElseThrow(() -> new ResourceNotFoundException("UserSite", dto.getIdUtilSite()));
 
         if (dto.getIdRl() != null) {
-            roleRepository.findById(dto.getIdRl().toString().replace("-", ""))
+            roleRepository.findById(dto.getIdRl())
                     .orElseThrow(() -> new ResourceNotFoundException("Role", dto.getIdRl()));
         }
 
         if (dto.getIdPr() != null) {
-            profilRepository.findById(dto.getIdPr().toString().replace("-", ""))
+            profilRepository.findById(dto.getIdPr())
                     .orElseThrow(() -> new ResourceNotFoundException("Profil", dto.getIdPr()));
         }
 
         if (dto.getIdGr() != null) {
-            groupeRepository.findById(dto.getIdGr().toString().replace("-", ""))
+            groupeRepository.findById(dto.getIdGr())
                     .orElseThrow(() -> new ResourceNotFoundException("Groupe", dto.getIdGr()));
         }
     }

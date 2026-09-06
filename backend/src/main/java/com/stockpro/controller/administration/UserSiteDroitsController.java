@@ -2,8 +2,6 @@ package com.stockpro.controller.administration;
 
 import com.stockpro.dto.administration.UserSiteDroitsDTO;
 import com.stockpro.dto.common.PageResponseDTO;
-import com.stockpro.entity.administration.UserSiteDroits;
-import com.stockpro.mapper.administration.UserSiteDroitsMapper;
 import com.stockpro.service.administration.UserSiteDroitsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,7 +26,6 @@ import java.util.UUID;
 public class UserSiteDroitsController {
 
     private final UserSiteDroitsService userSiteDroitsService;
-    private final UserSiteDroitsMapper mapper;
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_UTILISATEURS', 'CONSULTATION')")
     @GetMapping
@@ -53,15 +50,15 @@ public class UserSiteDroitsController {
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_UTILISATEURS', 'MODIFICATION')")
     @PostMapping
     public ResponseEntity<UserSiteDroitsDTO> create(@Valid @RequestBody UserSiteDroitsDTO dto) {
-        UserSiteDroits created = mapper.toEntity(userSiteDroitsService.create((dto)));
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
+        UserSiteDroitsDTO created = userSiteDroitsService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_UTILISATEURS', 'MODIFICATION')")
     @PutMapping("/{id}")
     public ResponseEntity<UserSiteDroitsDTO> update(@PathVariable UUID id, @Valid @RequestBody UserSiteDroitsDTO dto) {
-        UserSiteDroits updated = mapper.toEntity(userSiteDroitsService.update(id, (dto)));
-        return ResponseEntity.ok(mapper.toDto(updated));
+        UserSiteDroitsDTO updated = userSiteDroitsService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @PreAuthorize("@accessGuard.can(authentication, 'ADMIN_UTILISATEURS', 'MODIFICATION')")

@@ -100,7 +100,7 @@ public class ProfilDroitServiceImpl implements ProfilDroitService {
     // Recupere l'entite ProfilDroit ou leve une exception si absente.
     // Reste interne au service : le contrat public ne manipule plus que des DTO.
     private ProfilDroit findEntityById(UUID id) {
-        return profilDroitRepository.findById(id.toString().replace("-", ""))
+        return profilDroitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ProfilDroit", id));
     }
 
@@ -108,14 +108,14 @@ public class ProfilDroitServiceImpl implements ProfilDroitService {
         if (profilDroit.getProfil() == null || profilDroit.getProfil().getIdPr() == null) {
             throw new IllegalArgumentException("Le profil (idPr) est obligatoire");
         }
-        Profil profil = profilRepository.findById(profilDroit.getProfil().getIdPr().toString().replace("-", ""))
+        Profil profil = profilRepository.findById(profilDroit.getProfil().getIdPr())
                 .orElseThrow(() -> new ResourceNotFoundException("Profil", profilDroit.getProfil().getIdPr()));
         profilDroit.setProfil(profil);
 
         if (profilDroit.getFonctionnalite() == null || profilDroit.getFonctionnalite().getIdFonc() == null) {
             throw new IllegalArgumentException("La fonctionnalite (idFonc) est obligatoire");
         }
-        Fonctionnalite fonctionnalite = fonctionnaliteRepository.findById(profilDroit.getFonctionnalite().getIdFonc().toString().replace("-", ""))
+        Fonctionnalite fonctionnalite = fonctionnaliteRepository.findById(profilDroit.getFonctionnalite().getIdFonc())
                 .orElseThrow(() -> new ResourceNotFoundException("Fonctionnalite", profilDroit.getFonctionnalite().getIdFonc()));
         profilDroit.setFonctionnalite(fonctionnalite);
     }

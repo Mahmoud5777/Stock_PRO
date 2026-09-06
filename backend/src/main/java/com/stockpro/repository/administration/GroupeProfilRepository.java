@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface GroupeProfilRepository extends JpaRepository<GroupeProfil, String> {
+public interface GroupeProfilRepository extends JpaRepository<GroupeProfil, UUID> {
     List<GroupeProfil> findByGroupe_IdGr(UUID idGr);
     List<GroupeProfil> findByProfil_IdPr(UUID idPr);
 }
